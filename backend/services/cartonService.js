@@ -1,6 +1,7 @@
 
 const Carton =
-    require("../models/Carton");
+    require("../models/carton");
+
 
 const suggestCarton =
     async (productVolume, totalWeight) => {
