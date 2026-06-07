@@ -2,7 +2,7 @@
 const Order = require("../models/Order");
 const Inventory = require("../models/Inventory");
 const Task = require("../models/Task");
-const ShippingLabel = require("../models/ShippingLabel");
+const ShippingLabel = require("../models/shippingLabel");
 
 // CREATE ORDER
 exports.createOrder = async (req, res) => {

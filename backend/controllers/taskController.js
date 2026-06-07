@@ -12,7 +12,7 @@ const Order =
     require("../models/Order");
 
 const ShippingLabel =
-    require("../models/ShippingLabel");
+    require("../models/shippingLabel");
 
 const {
     generateTrackingNumber
