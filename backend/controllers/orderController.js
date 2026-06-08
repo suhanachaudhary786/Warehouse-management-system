@@ -4,12 +4,10 @@ const Inventory = require("../models/Inventory");
 const Task = require("../models/Task");
 const ShippingLabel = require("../models/shippingLabel");
 
-// CREATE ORDER
 exports.createOrder = async (req, res) => {
     try {
         const { items, customerName, customerEmail, shippingAddress, priority } = req.body;
 
-        // Validate items
         if (!items || items.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -27,7 +25,6 @@ exports.createOrder = async (req, res) => {
             status: "created"
         });
 
-        // Check inventory and allocate
         for (const item of items) {
             const inventory = await Inventory.findOne({
                 sku: item.sku,
@@ -36,7 +33,6 @@ exports.createOrder = async (req, res) => {
             }).populate("bin");
 
             if (!inventory) {
-                // Rollback - delete the order if inventory not available
                 await Order.findByIdAndDelete(createdOrder._id);
                 return res.status(400).json({
                     success: false,
@@ -44,12 +40,10 @@ exports.createOrder = async (req, res) => {
                 });
             }
 
-            // Update inventory
             inventory.qty = inventory.qty - item.qty;
             inventory.status = "allocated";
             await inventory.save();
 
-            // Create pick task
             await Task.create({
                 taskType: "pick",
                 order: createdOrder._id,
@@ -62,11 +56,9 @@ exports.createOrder = async (req, res) => {
             });
         }
 
-        // Update order status
         createdOrder.status = "allocated";
         await createdOrder.save();
 
-        // Populate order details
         const populatedOrder = await Order.findById(createdOrder._id)
             .populate("items.sku")
             .populate("shippingLabel");
@@ -84,7 +76,6 @@ exports.createOrder = async (req, res) => {
     }
 };
 
-// GET ALL ORDERS
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find()
@@ -105,7 +96,6 @@ exports.getAllOrders = async (req, res) => {
     }
 };
 
-// GET ORDER BY ID
 exports.getOrderById = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
@@ -131,7 +121,6 @@ exports.getOrderById = async (req, res) => {
     }
 };
 
-// UPDATE ORDER STATUS
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
@@ -171,7 +160,6 @@ exports.updateOrderStatus = async (req, res) => {
     }
 };
 
-// DELETE ORDER
 exports.deleteOrder = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
@@ -191,7 +179,6 @@ exports.deleteOrder = async (req, res) => {
             });
         }
 
-        // Restore inventory if needed
         if (order.status === "allocated") {
             for (const item of order.items) {
                 const inventory = await Inventory.findOne({
@@ -220,7 +207,6 @@ exports.deleteOrder = async (req, res) => {
     }
 };
 
-// TRACK SHIPMENT
 exports.trackShipment = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
@@ -254,12 +240,10 @@ exports.trackShipment = async (req, res) => {
 
 
 
-// GET ORDER STATS FOR WORKER
 exports.getWorkerOrderStats = async (req, res) => {
     try {
         const workerId = req.params.workerId;
 
-        // Get tasks assigned to worker
         const tasks = await Task.find({
             assignedTo: workerId,
             order: { $ne: null }

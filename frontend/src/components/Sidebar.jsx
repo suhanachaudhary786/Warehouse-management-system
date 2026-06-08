@@ -1,5 +1,4 @@
 
-// components/Sidebar.jsx
 import { useState, useEffect } from "react";
 import {
     FaBox,
@@ -42,8 +41,6 @@ function Sidebar() {
         { name: "Workers", path: "/workers", icon: <FaUsers /> },
     ];
 
-    // Worker Menus (Limited Access)
-    // components/Sidebar.jsx - Update worker menus
     const workerMenus = [
         { name: "Dashboard", path: "/dashboard", icon: <FaHome /> },
         { name: "Receive Goods", path: "/receiving", icon: <FaBoxOpen /> },  // Add this

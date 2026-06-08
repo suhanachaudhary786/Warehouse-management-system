@@ -44,7 +44,7 @@ exports.getPendingTasks =
 
 exports.acceptTask = async (req, res) => {
     try {
-        const { assignedWorker } = req.body;  // ✅ Frontend se worker ID le rahe hain
+        const { assignedWorker } = req.body;
 
         console.log("Accept Task - Request body:", req.body);
         console.log("Assigned Worker ID:", assignedWorker);
@@ -542,9 +542,6 @@ exports.completeShipTask =
     };
 
 
-// controllers/taskController.js - Add these new functions at the end
-
-// GET TASKS FOR SPECIFIC WORKER
 exports.getWorkerTasks = async (req, res) => {
     try {
         const workerId = req.params.workerId;
@@ -571,7 +568,6 @@ exports.getWorkerTasks = async (req, res) => {
     }
 };
 
-// GET PENDING TASKS FOR WORKER
 exports.getWorkerPendingTasks = async (req, res) => {
     try {
         const workerId = req.params.workerId;
@@ -596,9 +592,6 @@ exports.getWorkerPendingTasks = async (req, res) => {
     }
 };
 
-// WORKER COMPLETES TASK
-
-// WORKER COMPLETES TASK
 exports.completeWorkerTask = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
@@ -610,7 +603,6 @@ exports.completeWorkerTask = async (req, res) => {
             });
         }
 
-        // ✅ Add debug logs
         console.log("=== COMPLETE TASK DEBUG ===");
         console.log("Task ID:", req.params.id);
         console.log("Task assignedTo:", task.assignedTo?.toString());
@@ -620,20 +612,20 @@ exports.completeWorkerTask = async (req, res) => {
 
         // Check if task is assigned to this worker
         if (task.assignedTo?.toString() !== req.user._id?.toString() && req.user.role !== "manager") {
-            console.log("❌ Authorization failed!");
+            console.log("Authorization failed!");
             return res.status(403).json({
                 success: false,
                 message: "You are not authorized to complete this task"
             });
         }
 
-        console.log("✅ Authorization passed!");
+        console.log("Authorization passed!");
 
         task.status = "completed";
         task.completedAt = new Date();
         await task.save();
 
-        console.log(`✅ Task ${task._id} marked as completed`);
+        console.log(`Task ${task._id} marked as completed`);
 
         res.status(200).json({
             success: true,
@@ -649,7 +641,6 @@ exports.completeWorkerTask = async (req, res) => {
     }
 };
 
-// GET TASK STATS FOR WORKER
 exports.getWorkerTaskStats = async (req, res) => {
     try {
         const workerId = req.params.workerId;

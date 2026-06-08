@@ -1,5 +1,4 @@
 
-// services/shippingService.js
 const generateTrackingNumber = () => {
     const prefix = "TRK";
     const timestamp = Date.now().toString().slice(-8);
@@ -32,7 +31,7 @@ const calculateShippingCost = (weight, carrier, serviceType) => {
     };
 
     const rate = baseRates[carrier]?.[serviceType] || 10;
-    const weightCost = Math.ceil(weight / 5) * 5; // ₹5 per kg additional
+    const weightCost = Math.ceil(weight / 5) * 5;
     return rate + weightCost;
 };
 

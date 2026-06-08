@@ -1,5 +1,4 @@
 
-// components/tasks/TaskDetailsModal.jsx
 import { FaTimes, FaBox, FaUser, FaMapMarker, FaCalendar, FaClock } from "react-icons/fa";
 
 function TaskDetailsModal({ open, onClose, task }) {

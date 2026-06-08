@@ -1,5 +1,4 @@
 
-// pages/Profile.jsx
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { FaUser, FaEnvelope, FaUserTag } from "react-icons/fa";

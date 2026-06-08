@@ -2,7 +2,6 @@
 const Inventory = require("../models/Inventory");
 
 
-// CREATE INVENTORY
 exports.createInventory = async (
     req,
     res
@@ -24,7 +23,6 @@ exports.createInventory = async (
 };
 
 
-// GET ALL
 exports.getInventories = async (
     req,
     res
@@ -49,7 +47,6 @@ exports.getInventories = async (
 };
 
 
-// GET BY ID
 exports.getInventoryById = async (
     req,
     res
@@ -83,7 +80,6 @@ exports.getInventoryById = async (
 };
 
 
-// UPDATE
 exports.updateInventory = async (
     req,
     res
@@ -111,7 +107,6 @@ exports.updateInventory = async (
 };
 
 
-// DELETE
 exports.deleteInventory = async (
     req,
     res

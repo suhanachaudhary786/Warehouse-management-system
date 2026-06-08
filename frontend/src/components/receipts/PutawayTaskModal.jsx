@@ -1,5 +1,4 @@
 
-// components/receipts/PutawayTaskModal.jsx
 import { useState } from "react";
 import { FaTimes, FaQrcode, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -74,7 +73,7 @@ function PutawayTaskModal({ open, onClose, task, onComplete }) {
                         </div>
                         {suggestedBinCode !== actualBinCode && actualBinCode && (
                             <p className="text-xs text-amber-600 mt-1">
-                                ⚠️ You are overriding the suggested bin. Please ensure this bin is suitable.
+                                You are overriding the suggested bin. Please ensure this bin is suitable.
                             </p>
                         )}
                     </div>

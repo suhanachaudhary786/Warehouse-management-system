@@ -1,5 +1,4 @@
 
-// controllers/receiptController.js
 const Receipt = require("../models/Receipt");
 const SKU = require("../models/SKU");
 const Task = require("../models/Task");
@@ -8,7 +7,6 @@ const Bin = require("../models/Bin");
 const Worker = require("../models/Worker");
 const { findBestBin, updateBinVolume, calculateRemainingVolume } = require("../services/slottingService");
 
-// Generate receipt number
 function generateReceiptNumber() {
     const date = new Date();
     const year = date.getFullYear();
@@ -18,7 +16,6 @@ function generateReceiptNumber() {
     return `RCP-${year}${month}${day}-${random}`;
 }
 
-// CREATE RECEIPT (Manager)
 exports.createReceipt = async (req, res) => {
     try {
         const { supplier, expectedDate, items, notes } = req.body;
@@ -30,7 +27,6 @@ exports.createReceipt = async (req, res) => {
             });
         }
 
-        // Validate SKUs exist
         for (const item of items) {
             const sku = await SKU.findById(item.sku);
             if (!sku) {
@@ -65,7 +61,6 @@ exports.createReceipt = async (req, res) => {
     }
 };
 
-// GET ALL RECEIPTS
 exports.getAllReceipts = async (req, res) => {
     try {
         const receipts = await Receipt.find()
@@ -86,7 +81,6 @@ exports.getAllReceipts = async (req, res) => {
     }
 };
 
-// GET RECEIPT BY ID
 exports.getReceiptById = async (req, res) => {
     try {
         const receipt = await Receipt.findById(req.params.id)
@@ -112,16 +106,12 @@ exports.getReceiptById = async (req, res) => {
     }
 };
 
-// controllers/receiptController.js - Add this debug version
-
-// controllers/receiptController.js - Complete working version
 
 exports.receiveGoods = async (req, res) => {
     try {
         const { id } = req.params;
         const { items } = req.body;
 
-        console.log("========== RECEIVE GOODS ==========");
         console.log("Receipt ID:", id);
 
         // Find receipt with populated SKU
@@ -172,7 +162,7 @@ exports.receiveGoods = async (req, res) => {
                 const bin = await Bin.findOne({ status: "AVAILABLE" });
 
                 if (!bin) {
-                    console.log("⚠️ No bin found! Creating task without bin...");
+                    console.log("No bin found! Creating task without bin...");
                     // Create task without bin (will be assigned later)
                     const task = await Task.create({
                         taskType: "putaway",
@@ -185,7 +175,7 @@ exports.receiveGoods = async (req, res) => {
                         status: "pending",
                     });
                     putawayTasks.push(task);
-                    console.log(`✅ Task created: ${task._id} (no bin assigned)`);
+                    console.log(`Task created: ${task._id} (no bin assigned)`);
                 } else {
                     // Create task with bin
                     const task = await Task.create({
@@ -199,12 +189,12 @@ exports.receiveGoods = async (req, res) => {
                         status: "pending",
                     });
                     putawayTasks.push(task);
-                    console.log(`✅ Task created: ${task._id} with bin ${bin.code}`);
+                    console.log(`Task created: ${task._id} with bin ${bin.code}`);
                 }
             }
         }
 
-        console.log(`\n✅ Total putaway tasks created: ${putawayTasks.length}`);
+        console.log(`\nTotal putaway tasks created: ${putawayTasks.length}`);
 
         res.status(200).json({
             success: true,
@@ -225,8 +215,6 @@ exports.receiveGoods = async (req, res) => {
     }
 };
 
-
-// controllers/receiptController.js - Fix getPutawayTasks
 
 exports.getPutawayTasks = async (req, res) => {
     try {
@@ -258,7 +246,6 @@ exports.getPutawayTasks = async (req, res) => {
 };
 
 
-// COMPLETE PUTAWAY (Worker)
 exports.completePutaway = async (req, res) => {
     try {
         const { taskId } = req.params;
@@ -393,7 +380,6 @@ exports.completePutaway = async (req, res) => {
     }
 };
 
-// DELETE RECEIPT (Manager)
 exports.deleteReceipt = async (req, res) => {
     try {
         const receipt = await Receipt.findById(req.params.id);

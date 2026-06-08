@@ -1,5 +1,4 @@
 
-// components/warehouse/BinDetailsModal.jsx
 import { useState } from "react";
 import { FaTimes, FaBox, FaWeight, FaChartLine, FaArchive } from "react-icons/fa";
 
@@ -48,10 +47,10 @@ function BinDetailsModal({ open, onClose, bin, inventory, refresh }) {
                             <p className="text-sm text-gray-500">Status</p>
                             <span
                                 className={`px-3 py-1 rounded-full text-sm font-medium ${bin.status === "AVAILABLE"
-                                        ? "bg-green-100 text-green-600"
-                                        : bin.status === "FULL"
-                                            ? "bg-red-100 text-red-600"
-                                            : "bg-gray-100 text-gray-600"
+                                    ? "bg-green-100 text-green-600"
+                                    : bin.status === "FULL"
+                                        ? "bg-red-100 text-red-600"
+                                        : "bg-gray-100 text-gray-600"
                                     }`}
                             >
                                 {bin.status || "AVAILABLE"}

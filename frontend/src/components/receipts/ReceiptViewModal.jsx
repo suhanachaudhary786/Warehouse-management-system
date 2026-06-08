@@ -1,5 +1,4 @@
 
-// components/receipts/ReceiptViewModal.jsx
 import { FaTimes, FaBox, FaCalendar, FaUser, FaBuilding } from "react-icons/fa";
 
 function ReceiptViewModal({ open, onClose, receipt }) {
@@ -89,11 +88,9 @@ function ReceiptViewModal({ open, onClose, receipt }) {
                                     {receipt.items?.map((item, index) => (
                                         <tr key={index} className="border-b">
                                             <td className="p-3 font-mono text-sm">
-                                                {/* ✅ FIX: Use sku.skuCode instead of entire sku object */}
                                                 {item.sku?.skuCode || "N/A"}
                                             </td>
                                             <td className="p-3">
-                                                {/* ✅ FIX: Use sku.name */}
                                                 {item.sku?.name || "N/A"}
                                             </td>
                                             <td className="p-3 text-right font-medium">
@@ -104,10 +101,10 @@ function ReceiptViewModal({ open, onClose, receipt }) {
                                             </td>
                                             <td className="p-3 text-center">
                                                 <span className={`text-xs px-2 py-1 rounded-full ${(item.receivedQty || 0) >= item.expectedQty
-                                                        ? "bg-green-100 text-green-600"
-                                                        : item.receivedQty > 0
-                                                            ? "bg-yellow-100 text-yellow-600"
-                                                            : "bg-gray-100 text-gray-600"
+                                                    ? "bg-green-100 text-green-600"
+                                                    : item.receivedQty > 0
+                                                        ? "bg-yellow-100 text-yellow-600"
+                                                        : "bg-gray-100 text-gray-600"
                                                     }`}>
                                                     {item.receivedQty >= item.expectedQty
                                                         ? "Completed"

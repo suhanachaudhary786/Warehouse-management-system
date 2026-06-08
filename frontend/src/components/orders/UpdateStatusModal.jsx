@@ -1,5 +1,4 @@
 
-// components/orders/UpdateStatusModal.jsx
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 
@@ -46,8 +45,8 @@ function UpdateStatusModal({ open, onClose, order, onUpdate }) {
                             <label
                                 key={status.value}
                                 className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition ${selectedStatus === status.value
-                                        ? `border-${status.color}-500 bg-${status.color}-50`
-                                        : "hover:bg-gray-50"
+                                    ? `border-${status.color}-500 bg-${status.color}-50`
+                                    : "hover:bg-gray-50"
                                     }`}
                             >
                                 <input

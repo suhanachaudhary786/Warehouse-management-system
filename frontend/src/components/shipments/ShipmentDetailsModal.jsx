@@ -1,5 +1,4 @@
 
-// components/shipments/ShipmentDetailsModal.jsx
 import { FaTimes, FaTruck, FaBox, FaUser, FaMapMarker, FaCalendar, FaClock } from "react-icons/fa";
 
 function ShipmentDetailsModal({ open, onClose, shipment }) {

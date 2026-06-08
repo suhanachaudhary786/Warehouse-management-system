@@ -1,5 +1,4 @@
 
-// components/returns/ReturnDetailsModal.jsx
 import { FaTimes, FaBox, FaShoppingCart, FaUser, FaCalendar, FaClipboardList } from "react-icons/fa";
 
 function ReturnDetailsModal({ open, onClose, returnItem, onRestock, onDamage, onQuarantine }) {

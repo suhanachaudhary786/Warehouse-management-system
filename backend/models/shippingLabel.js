@@ -1,5 +1,4 @@
 
-// models/ShippingLabel.js
 const mongoose = require("mongoose");
 
 const shippingLabelSchema = new mongoose.Schema(

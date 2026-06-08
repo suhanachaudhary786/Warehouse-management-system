@@ -1,7 +1,4 @@
 
-
-// controllers/shipmentController.js - Simplified version
-
 const Shipment = require("../models/Shipment");
 const Order = require("../models/Order");
 const Task = require("../models/Task")
@@ -14,7 +11,6 @@ const generateShipmentNumber = () => {
     return `SHP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 };
 
-// CREATE SHIPMENT
 exports.createShipment = async (req, res) => {
     try {
         const { orderId, carrier, estimatedDelivery } = req.body;
@@ -53,7 +49,6 @@ exports.createShipment = async (req, res) => {
     }
 };
 
-// GET ALL SHIPMENTS
 exports.getAllShipments = async (req, res) => {
     try {
         const shipments = await Shipment.find()
@@ -73,7 +68,6 @@ exports.getAllShipments = async (req, res) => {
     }
 };
 
-// GET SHIPMENT BY ID
 exports.getShipmentById = async (req, res) => {
     try {
         const shipment = await Shipment.findById(req.params.id)
@@ -98,7 +92,6 @@ exports.getShipmentById = async (req, res) => {
     }
 };
 
-// UPDATE SHIPMENT STATUS
 exports.updateShipmentStatus = async (req, res) => {
     try {
         const { status } = req.body;
@@ -137,7 +130,6 @@ exports.updateShipmentStatus = async (req, res) => {
     }
 };
 
-// DELETE SHIPMENT
 exports.deleteShipment = async (req, res) => {
     try {
         const shipment = await Shipment.findById(req.params.id);
@@ -170,7 +162,6 @@ exports.deleteShipment = async (req, res) => {
     }
 };
 
-// GET WORKER SHIPMENTS (For worker dashboard)
 exports.getWorkerShipments = async (req, res) => {
     try {
         const workerId = req.params.workerId;

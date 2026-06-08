@@ -1,5 +1,4 @@
 
-// services/slottingService.js
 const Bin = require("../models/Bin");
 const Inventory = require("../models/Inventory");
 const Task = require("../models/Task");
@@ -8,7 +7,6 @@ async function calculateRemainingVolume(binId) {
     const bin = await Bin.findById(binId);
     if (!bin) return 0;
 
-    // Get current inventory in bin
     const inventories = await Inventory.find({ bin: binId }).populate("sku");
     const usedVolume = inventories.reduce((sum, inv) => {
         const sku = inv.sku;
@@ -19,8 +17,6 @@ async function calculateRemainingVolume(binId) {
         return sum;
     }, 0);
 
-    // ✅ FIX: Don't count pending tasks - use database remainingVolume directly
-    // Just use the bin's remainingVolume field from database
     const remaining = bin.remainingVolume !== undefined ? bin.remainingVolume : bin.volumeCapacity;
 
     console.log(`📦 Bin ${bin.code}: capacity=${bin.volumeCapacity}, used=${usedVolume}, remaining=${remaining}`);
@@ -28,18 +24,14 @@ async function calculateRemainingVolume(binId) {
     return Math.max(0, remaining);
 }
 
-// services/slottingService.js - Add debug logs
 
 async function findBestBin(sku, quantity) {
-    console.log("  📍 Inside findBestBin");
-    console.log("     SKU:", sku.skuCode);
-    console.log("     Quantity:", quantity);
 
     const bins = await Bin.find({ status: "AVAILABLE" });
     console.log(`     Total available bins: ${bins.length}`);
 
     if (bins.length === 0) {
-        console.log("     ❌ No available bins found!");
+        console.log("No available bins found!");
         return null;
     }
 
@@ -59,13 +51,13 @@ async function findBestBin(sku, quantity) {
 
         // Check volume
         if (remainingVolume < totalVolume) {
-            console.log(`     ❌ Bin ${bin.code}: Volume insufficient (need ${totalVolume}, have ${remainingVolume})`);
+            console.log(`Bin ${bin.code}: Volume insufficient (need ${totalVolume}, have ${remainingVolume})`);
             continue;
         }
 
         // Check weight
         if (bin.maxWeight && bin.maxWeight < totalWeight) {
-            console.log(`     ❌ Bin ${bin.code}: Weight capacity exceeded (need ${totalWeight}, max ${bin.maxWeight})`);
+            console.log(`Bin ${bin.code}: Weight capacity exceeded (need ${totalWeight}, max ${bin.maxWeight})`);
             continue;
         }
 
@@ -74,17 +66,17 @@ async function findBestBin(sku, quantity) {
             const allowedClasses = bin.allowedHandlingClasses || [];
             const allAllowed = sku.handlingClasses.every(hc => allowedClasses.includes(hc));
             if (!allAllowed) {
-                console.log(`     ❌ Bin ${bin.code}: Handling classes not allowed`);
+                console.log(`Bin ${bin.code}: Handling classes not allowed`);
                 continue;
             }
         }
 
-        console.log(`     ✅ Bin ${bin.code}: Eligible! Remaining volume: ${remainingVolume}`);
+        console.log(`Bin ${bin.code}: Eligible! Remaining volume: ${remainingVolume}`);
         eligibleBins.push(bin);
     }
 
     if (eligibleBins.length === 0) {
-        console.log("     ❌ No eligible bins found!");
+        console.log("No eligible bins found!");
         return null;
     }
 
@@ -106,7 +98,7 @@ async function findBestBin(sku, quantity) {
     }));
 
     scoredBins.sort((a, b) => b.score - a.score);
-    console.log(`     🏆 Best bin: ${scoredBins[0].bin.code} with score ${scoredBins[0].score.toFixed(2)}`);
+    console.log(`Best bin: ${scoredBins[0].bin.code} with score ${scoredBins[0].score.toFixed(2)}`);
 
     return scoredBins[0].bin;
 }

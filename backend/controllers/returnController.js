@@ -1,11 +1,9 @@
 
-// controllers/returnController.js
 const Return = require("../models/Return");
 const Task = require("../models/Task");
 const Inventory = require("../models/Inventory"); // Add this import
 const Order = require("../models/Order");
 
-// CREATE RETURN
 exports.createReturn = async (req, res) => {
     try {
         const { order, sku, qty, reason } = req.body;
@@ -63,7 +61,6 @@ exports.createReturn = async (req, res) => {
     }
 };
 
-// RESTOCK RETURN
 exports.restockReturn = async (req, res) => {
     try {
         const returnItem = await Return.findById(req.params.id);
@@ -82,7 +79,6 @@ exports.restockReturn = async (req, res) => {
             });
         }
 
-        // Find available inventory for this SKU
         let inventory = await Inventory.findOne({
             sku: returnItem.sku,
             status: "available"
@@ -144,7 +140,6 @@ exports.restockReturn = async (req, res) => {
     }
 };
 
-// MARK AS DAMAGED
 exports.damageReturn = async (req, res) => {
     try {
         const returnItem = await Return.findById(req.params.id);
@@ -193,7 +188,6 @@ exports.damageReturn = async (req, res) => {
     }
 };
 
-// QUARANTINE RETURN
 exports.quarantineReturn = async (req, res) => {
     try {
         const returnItem = await Return.findById(req.params.id);
@@ -242,7 +236,6 @@ exports.quarantineReturn = async (req, res) => {
     }
 };
 
-// GET ALL RETURNS
 exports.getReturns = async (req, res) => {
     try {
         const returns = await Return.find()
@@ -264,7 +257,6 @@ exports.getReturns = async (req, res) => {
     }
 };
 
-// GET RETURN BY ID
 exports.getReturnById = async (req, res) => {
     try {
         const returnItem = await Return.findById(req.params.id)

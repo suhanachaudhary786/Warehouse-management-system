@@ -1,5 +1,4 @@
 
-// components/orders/OrderDetailsModal.jsx
 import { FaTimes, FaTruck, FaBox, FaUser, FaMapMarker, FaCalendar } from "react-icons/fa";
 
 function OrderDetailsModal({ open, onClose, order }) {

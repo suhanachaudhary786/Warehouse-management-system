@@ -12,9 +12,8 @@ function BinFormModal({
         code: "",
         x: "",
         y: "",
-        // Remove z - backend mein 'z' field nahi hai
-        volumeCapacity: "",      // Changed from volume_capacity
-        maxWeight: "",           // Changed from max_weight
+        volumeCapacity: "",
+        maxWeight: "",
         allowedHandlingClasses: [], // Changed from allowed_handling_classes
         status: "AVAILABLE",     // Changed from "active" to match backend enum
     });

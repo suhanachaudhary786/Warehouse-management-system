@@ -1,6 +1,4 @@
 
-
-// pages/worker/WorkerReceiving.jsx (Mobile First Design)
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../api/api";

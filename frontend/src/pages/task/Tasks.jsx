@@ -1,6 +1,4 @@
 
-// pages/Tasks.jsx - Updated version with all task types
-
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../api/api";
