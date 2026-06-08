@@ -121,7 +121,7 @@ function AddWorkerModal({ isOpen, onClose, onSuccess, editingWorker }) {
       if (isEditing) {
         // Update existing worker
         response = await axios.put(
-          `http://localhost:5000/api/workers/${editingWorker._id}`,
+          `https://warehouse-management-system-backend-qro9.onrender.com/api/workers/${editingWorker._id}`,
           workerData,
           {
             headers: {
@@ -133,7 +133,7 @@ function AddWorkerModal({ isOpen, onClose, onSuccess, editingWorker }) {
       } else {
         // Create new worker
         response = await axios.post(
-          "http://localhost:5000/api/workers",
+          "https://warehouse-management-system-backend-qro9.onrender.com/api/workers",
           workerData,
           {
             headers: {
