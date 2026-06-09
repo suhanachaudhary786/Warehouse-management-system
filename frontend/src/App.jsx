@@ -49,7 +49,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Toaster position="top-right" />
+      <Toaster position="top-center" />
       <Routes>
         {/* Public Route */}
         <Route path="/" element={<Login />} />
