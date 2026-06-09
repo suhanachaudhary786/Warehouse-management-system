@@ -5,7 +5,7 @@ import API from "../../api/api";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaWarehouse } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-function Login() {
+function WorkerLogin() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +17,6 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (!form.email) {
             toast.error("Please enter your email");
             return;
@@ -31,6 +30,13 @@ function Login() {
 
         try {
             const res = await API.post("/auth/login", form);
+
+            // Check if user is worker
+            if (res.data.user.role !== "worker") {
+                toast.error("Access denied! This is Worker Portal. Please use worker credentials.");
+                setLoading(false);
+                return;
+            }
 
             // Store token and user data
             localStorage.setItem("token", res.data.token);
@@ -48,10 +54,6 @@ function Login() {
         }
     };
 
-    const handleDemoLogin = (email, password) => {
-        setForm({ email, password });
-    };
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
             {/* Animated Background */}
@@ -64,10 +66,8 @@ function Login() {
             <div className="relative w-full max-w-md">
                 {/* Logo/Brand Section */}
                 <div className="text-center mb-8">
-                    {/* <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl shadow-lg mb-4">
-                        <FaWarehouse className="text-white text-4xl" />
-                    </div> */}
-                    <h1 className="text-4xl font-bold text-white mb-2">WMS</h1>
+
+                    <h1 className="text-4xl font-bold text-white mb-2">Worker Portal</h1>
                     <p className="text-gray-400">Warehouse Management System</p>
                 </div>
 
@@ -93,7 +93,7 @@ function Login() {
                                     value={form.email}
                                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                                     className="w-full pl-10 pr-3 py-3 bg-white/5 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition"
-                                    placeholder="manager@wms.com"
+                                    placeholder="worker@wms.com"
                                     disabled={loading}
                                 />
                             </div>
@@ -162,17 +162,21 @@ function Login() {
                                     Signing in...
                                 </>
                             ) : (
-                                "Sign In"
+                                "Sign In as Worker"
                             )}
                         </button>
                     </form>
 
-
+                    <div className="mt-6 text-center">
+                        <a href="/manager-login" className="text-sm text-amber-500 hover:text-amber-400 transition">
+                            Manager Portal? Click here →
+                        </a>
+                    </div>
 
                     {/* Footer */}
                     <div className="mt-6 text-center">
                         <p className="text-xs text-gray-500">
-                            © 2024 WMS. All rights reserved.
+                            © 2026 WMS. All rights reserved.
                         </p>
                     </div>
                 </div>
@@ -181,4 +185,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default WorkerLogin;
