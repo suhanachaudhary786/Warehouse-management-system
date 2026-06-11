@@ -404,15 +404,6 @@ function Workers() {
                                                         {worker.maxSafeWeight || 0} kg
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <div className="flex items-center gap-1">
-                                                        <FaMapMarker className="text-gray-400 text-xs" />
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">Last Bin</p>
-                                                    </div>
-                                                    <p className="text-sm font-semibold font-mono text-amber-600 dark:text-amber-400">
-                                                        {worker.lastBinId || "A1"}
-                                                    </p>
-                                                </div>
                                             </div>
 
                                             <div className="flex gap-3 mt-4">

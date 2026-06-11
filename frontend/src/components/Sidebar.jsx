@@ -54,7 +54,7 @@ function Sidebar({ isOpen = true, onClose }) {
         { name: "Warehouse Map", path: "/map", icon: <FaMapMarkedAlt /> },
         { name: "Inventory", path: "/inventory", icon: <FaWarehouse /> },
         { name: "Orders", path: "/orders", icon: <FaClipboardList /> },
-        { name: "Receipts (ASN)", path: "/receipts", icon: <FaBoxOpen /> },
+        { name: "Receipts", path: "/receipts", icon: <FaBoxOpen /> },
         { name: "Shipments", path: "/shipments", icon: <FaTruck /> },
         { name: "Returns", path: "/returns", icon: <FaUndo /> },
         { name: "Tasks", path: "/tasks", icon: <FaTasks /> },

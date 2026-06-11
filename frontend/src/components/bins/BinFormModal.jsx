@@ -12,6 +12,7 @@ function BinFormModal({
         code: "",
         x: "",
         y: "",
+        z: "",
         volumeCapacity: "",
         maxWeight: "",
         allowedHandlingClasses: [], // Changed from allowed_handling_classes
@@ -27,6 +28,7 @@ function BinFormModal({
                 code: selectedBin.code || "",
                 x: selectedBin.x || "",
                 y: selectedBin.y || "",
+                z: selectedBin.z || "",
                 volumeCapacity: selectedBin.volumeCapacity || "",
                 maxWeight: selectedBin.maxWeight || "",
                 allowedHandlingClasses: selectedBin.allowedHandlingClasses || [],
@@ -37,6 +39,7 @@ function BinFormModal({
                 code: "",
                 x: "",
                 y: "",
+                z: "",
                 volumeCapacity: "",
                 maxWeight: "",
                 allowedHandlingClasses: [],
@@ -89,6 +92,7 @@ function BinFormModal({
             code: form.code,
             x: form.x ? Number(form.x) : undefined,
             y: form.y ? Number(form.y) : undefined,
+            z: form.z ? Number(form.z) : undefined,
             volumeCapacity: Number(form.volumeCapacity),
             remainingVolume: selectedBin ? selectedBin.remainingVolume : Number(form.volumeCapacity), // Default to full capacity
             maxWeight: form.maxWeight ? Number(form.maxWeight) : undefined,
@@ -187,7 +191,7 @@ function BinFormModal({
                                 className="w-full border rounded-xl p-3 mt-1 focus:ring-2 focus:ring-amber-500"
                             >
                                 <option value="AVAILABLE">Available</option>
-                                <option value="FULL">Full</option>
+                                <option value="MAINTENANCE">Maintenance</option>
                             </select>
                         </div>
                     </div>
@@ -218,6 +222,18 @@ function BinFormModal({
                                     step="1"
                                     className="w-full border rounded-xl p-3 mt-1 focus:ring-2 focus:ring-amber-500"
                                     placeholder="e.g., 5"
+                                />
+                            </div>
+                            <div>
+                                <label>Z Coordinate</label>
+                                <input
+                                    type="number"
+                                    name="z"
+                                    value={form.z}
+                                    onChange={handleChange}
+                                    step="1"
+                                    className="w-full border rounded-xl p-3 mt-1 focus:ring-2 focus:ring-amber-500"
+                                    placeholder="e.g., 10"
                                 />
                             </div>
                         </div>

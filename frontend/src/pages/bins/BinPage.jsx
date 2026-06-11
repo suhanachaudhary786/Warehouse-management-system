@@ -15,7 +15,11 @@ import {
     FaCube,
     FaWeightHanging,
     FaChartLine,
-    FaExclamationTriangle
+    FaArrowsAltV,
+    FaLayerGroup,
+    FaExclamationTriangle,
+    FaBan,
+    FaTools,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 
@@ -28,6 +32,8 @@ function BinPage() {
     const [isMobile, setIsMobile] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+    const [binToDeactivate, setBinToDeactivate] = useState(null);
 
     const fetchBins = async () => {
         try {
@@ -56,13 +62,69 @@ function BinPage() {
         setCurrentPage(1);
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = window.confirm("Delete this bin?");
+    // Deactivate bin (instead of delete)
+    const handleDeactivate = async (bin, reason = "MAINTENANCE") => {
+        try {
+            // First check if bin has inventory
+            const inventoryRes = await api.get(`/inventory?bin=${bin._id}`);
+            const inventoryInBin = inventoryRes.data.data || [];
+
+            if (inventoryInBin.length > 0) {
+                toast.error(`Cannot deactivate bin. ${inventoryInBin.length} item(s) still in this bin. Please move stock first.`);
+                return;
+            }
+
+            // Deactivate the bin
+            await api.put(`/bins/${bin._id}/deactivate`, {
+                status: reason === "MAINTENANCE" ? "MAINTENANCE" : "INACTIVE"
+            });
+
+            toast.success(`Bin ${bin.code} deactivated successfully`);
+            fetchBins();
+            setShowDeactivateModal(false);
+            setBinToDeactivate(null);
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || "Failed to deactivate bin");
+        }
+    };
+
+    //Activate bin (reactivate)
+    const handleActivate = async (bin) => {
+        try {
+            await api.put(`/bins/${bin._id}/activate`, {
+                status: "AVAILABLE"
+            });
+            toast.success(`Bin ${bin.code} activated successfully`);
+            fetchBins();
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to activate bin");
+        }
+    };
+
+    // Hard delete (only for empty bins with admin confirmation)
+    const handleHardDelete = async (bin) => {
+        const confirmDelete = window.confirm(
+            `⚠️ WARNING: This will permanently delete bin ${bin.code}.\n\n` +
+            `This action cannot be undone.\n\n` +
+            `Only proceed if bin has no stock and you want to permanently remove it.`
+        );
+
         if (!confirmDelete) return;
 
         try {
-            await api.delete(`/bins/${id}`);
-            toast.success("Bin deleted successfully");
+            // Check if bin has inventory
+            const inventoryRes = await api.get(`/inventory?bin=${bin._id}`);
+            const inventoryInBin = inventoryRes.data.data || [];
+
+            if (inventoryInBin.length > 0) {
+                toast.error(`Cannot delete bin. ${inventoryInBin.length} item(s) still in this bin. Move stock first.`);
+                return;
+            }
+
+            await api.delete(`/bins/${bin._id}/hard`);
+            toast.success(`Bin ${bin.code} permanently deleted`);
             fetchBins();
         } catch (error) {
             console.log(error);
@@ -85,13 +147,14 @@ function BinPage() {
     const totalBins = bins.length;
     const availableBins = bins.filter((bin) => bin.status === "AVAILABLE").length;
     const fullBins = bins.filter((bin) => bin.status === "FULL").length;
-    const maintenanceBins = bins.filter((bin) => bin.status === "MAINTENANCE").length;
+    const maintenanceBins = bins.filter((bin) => bin.status === "MAINTENANCE" || bin.status === "INACTIVE").length;
 
     const getStatusColor = (status) => {
         const colors = {
             AVAILABLE: "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400",
             FULL: "bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400",
-            MAINTENANCE: "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400",
+            MAINTENANCE: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400",
+            INACTIVE: "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400",
         };
         return colors[status] || "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
     };
@@ -101,15 +164,53 @@ function BinPage() {
             AVAILABLE: "✅",
             FULL: "📦",
             MAINTENANCE: "🔧",
+            INACTIVE: "❌",
         };
         return icons[status] || "📋";
+    };
+
+    // Deactivate Modal
+    const DeactivateModal = () => {
+        if (!showDeactivateModal || !binToDeactivate) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6">
+                    <h2 className="text-xl font-bold mb-4">Deactivate Bin</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Are you sure you want to deactivate bin <span className="font-mono font-bold">{binToDeactivate.code}</span>?
+                    </p>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Deactivated bins will not be used for new putaway tasks.
+                        You can reactivate them later.
+                    </p>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => {
+                                setShowDeactivateModal(false);
+                                setBinToDeactivate(null);
+                            }}
+                            className="flex-1 px-4 py-2 border rounded-lg"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => handleDeactivate(binToDeactivate, "MAINTENANCE")}
+                            className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                        >
+                            Deactivate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
         <DashboardLayout>
             <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
                 <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-                    {/* Header - Responsive */}
+                    {/* Header */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
                         <div>
                             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">
@@ -131,7 +232,7 @@ function BinPage() {
                         </button>
                     </div>
 
-                    {/* Stats Cards - Responsive Grid */}
+                    {/* Stats Cards */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 md:mb-8">
                         <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl border p-3 sm:p-4">
                             <div className="flex items-center justify-between">
@@ -163,10 +264,10 @@ function BinPage() {
                         <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl border p-3 sm:p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance/Inactive</p>
                                     <h2 className="text-xl sm:text-2xl font-bold text-red-600">{maintenanceBins}</h2>
                                 </div>
-                                <FaExclamationTriangle className="text-red-500 text-xl sm:text-2xl" />
+                                <FaTools className="text-red-500 text-xl sm:text-2xl" />
                             </div>
                         </div>
                     </div>
@@ -208,11 +309,20 @@ function BinPage() {
                                                     <FaWarehouse className="text-amber-500" />
                                                     <h3 className="font-semibold font-mono text-base">{bin.code}</h3>
                                                 </div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <FaLocationArrow className="text-gray-400 text-xs" />
-                                                    <p className="text-xs text-gray-500 font-mono">
-                                                        ({bin.x || 0}, {bin.y || 0})
-                                                    </p>
+                                                {/* Coordinates - Show X, Y, Z */}
+                                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                    <div className="flex items-center gap-1">
+                                                        <FaLocationArrow className="text-gray-400 text-xs" />
+                                                        <p className="text-xs text-gray-500 font-mono">X: {bin.x || 0}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <FaArrowsAltV className="text-gray-400 text-xs rotate-90" />
+                                                        <p className="text-xs text-gray-500 font-mono">Y: {bin.y || 0}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <FaLayerGroup className="text-gray-400 text-xs" />
+                                                        <p className="text-xs text-gray-500 font-mono">Z: {bin.z || 1}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(bin.status)}`}>
@@ -273,6 +383,7 @@ function BinPage() {
                                             </div>
                                         </div>
 
+                                        {/* 🟢 UPDATED: Action Buttons */}
                                         <div className="flex justify-end gap-3 pt-2 border-t dark:border-slate-700">
                                             <button
                                                 onClick={() => {
@@ -280,15 +391,40 @@ function BinPage() {
                                                     setOpenModal(true);
                                                 }}
                                                 className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition"
+                                                title="Edit Bin"
                                             >
                                                 <FaEdit />
                                             </button>
-                                            <button
-                                                onClick={() => handleDelete(bin._id)}
-                                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+
+                                            {bin.status === "AVAILABLE" || bin.status === "FULL" ? (
+                                                <button
+                                                    onClick={() => {
+                                                        setBinToDeactivate(bin);
+                                                        setShowDeactivateModal(true);
+                                                    }}
+                                                    className="p-2 text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition"
+                                                    title="Deactivate Bin"
+                                                >
+                                                    <FaBan />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleActivate(bin)}
+                                                    className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition"
+                                                    title="Activate Bin"
+                                                >
+                                                    <FaWarehouse />
+                                                </button>
+                                            )}
+
+                                            {/* Hard Delete - Only for empty bins, hidden by default */}
+                                            {/* <button
+                                                onClick={() => handleHardDelete(bin)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                                                title="Permanently Delete (Empty Bins Only)"
                                             >
                                                 <FaTrash />
-                                            </button>
+                                            </button> */}
                                         </div>
                                     </div>
                                 ))
@@ -304,7 +440,7 @@ function BinPage() {
                                     <thead className="bg-gray-50 dark:bg-slate-700">
                                         <tr className="border-b dark:border-slate-600">
                                             <th className="p-4 text-left text-sm font-semibold">Bin Code</th>
-                                            <th className="p-4 text-left text-sm font-semibold">Coordinates</th>
+                                            <th className="p-4 text-left text-sm font-semibold">Coordinates (X,Y,Z)</th>
                                             <th className="p-4 text-left text-sm font-semibold">Volume</th>
                                             <th className="p-4 text-left text-sm font-semibold">Max Weight</th>
                                             <th className="p-4 text-left text-sm font-semibold">Remaining</th>
@@ -336,9 +472,15 @@ function BinPage() {
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
-                                                        <div className="flex items-center gap-1">
+                                                        <div className="flex items-center gap-1 flex-wrap">
                                                             <FaLocationArrow className="text-gray-400 text-xs" />
-                                                            <span className="font-mono text-sm">({bin.x || 0}, {bin.y || 0})</span>
+                                                            <span className="font-mono text-sm">X:{bin.x || 0}</span>
+                                                            <span className="text-gray-400">,</span>
+                                                            <FaArrowsAltV className="text-gray-400 text-xs rotate-90" />
+                                                            <span className="font-mono text-sm">Y:{bin.y || 0}</span>
+                                                            <span className="text-gray-400">,</span>
+                                                            <FaLayerGroup className="text-gray-400 text-xs" />
+                                                            <span className="font-mono text-sm">Z:{bin.z || 1}</span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
@@ -404,13 +546,27 @@ function BinPage() {
                                                             >
                                                                 <FaEdit />
                                                             </button>
-                                                            <button
-                                                                onClick={() => handleDelete(bin._id)}
-                                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                                                                title="Delete Bin"
-                                                            >
-                                                                <FaTrash />
-                                                            </button>
+
+                                                            {bin.status === "AVAILABLE" || bin.status === "FULL" ? (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setBinToDeactivate(bin);
+                                                                        setShowDeactivateModal(true);
+                                                                    }}
+                                                                    className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg transition"
+                                                                    title="Deactivate Bin"
+                                                                >
+                                                                    <FaBan />
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleActivate(bin)}
+                                                                    className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition"
+                                                                    title="Activate Bin"
+                                                                >
+                                                                    <FaWarehouse />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -451,6 +607,9 @@ function BinPage() {
                     )}
                 </div>
             </div>
+
+            {/* Deactivate Modal */}
+            <DeactivateModal />
 
             {/* Bin Form Modal */}
             <BinFormModal

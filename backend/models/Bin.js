@@ -9,8 +9,9 @@ const binSchema = new mongoose.Schema(
             unique: true,
         },
 
-        x: Number,
-        y: Number,
+        x: Number,   // X coordinate
+        y: Number,   // Y coordinate  
+        z: Number,
 
         volumeCapacity: {
             type: Number,
@@ -28,7 +29,7 @@ const binSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["AVAILABLE", "FULL"],
+            enum: ["AVAILABLE", "FULL", "MAINTENANCE", "INACTIVE"],
             default: "AVAILABLE",
         },
     },

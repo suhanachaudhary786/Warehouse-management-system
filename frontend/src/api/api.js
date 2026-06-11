@@ -2,7 +2,8 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "https://warehouse-management-system-backend-qro9.onrender.com/api",
+    // baseURL: "https://warehouse-management-system-backend-qro9.onrender.com/api",
+    baseURL: "http://localhost:5000/api"
 });
 
 API.interceptors.request.use((req) => {
