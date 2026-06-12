@@ -10,7 +10,6 @@ function RoleSelection() {
             <div className="max-w-4xl w-full">
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-3xl shadow-lg mb-6">
-                        <FaWarehouse className="text-white text-5xl" />
                     </div>
                     <h1 className="text-5xl font-bold text-white mb-4">WMS System</h1>
                     <p className="text-xl text-gray-400">Select your portal to continue</p>
