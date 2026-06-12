@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import api from "../../api/api";
-import { FaTimes, FaBarcode, FaBox, FaRuler, FaInfoCircle, FaWeightHanging, FaTachometerAlt, FaTags, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaTimes, FaBarcode, FaBox, FaRuler, FaInfoCircle, FaWeightHanging, FaTachometerAlt, FaTags, FaCheckCircle, FaExclamationTriangle, FaPlus, FaSave } from "react-icons/fa";
 
 function SKUFormModal({ open, onClose, selectedSku, refresh }) {
     const [form, setForm] = useState({
@@ -17,6 +17,7 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Handling classes options
     const handlingOptions = [
@@ -61,6 +62,7 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
             });
         }
         setError("");
+        setSuccessMessage("");
     }, [selectedSku, open]);
 
     if (!open) return null;
@@ -79,34 +81,42 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+    // Reset form for next SKU
+    const resetForm = () => {
+        setForm({
+            skuCode: "",
+            name: "",
+            length: "",
+            width: "",
+            height: "",
+            weight: "",
+            velocityClass: "MEDIUM",
+            handlingClasses: [],
+        });
         setError("");
+    };
 
+    // Save and optionally add another
+    const saveSKU = async (shouldAddAnother = false) => {
         // Validation
         if (!form.skuCode) {
             setError("SKU Code is required");
-            setLoading(false);
-            return;
+            return false;
         }
 
         if (!form.name) {
             setError("SKU Name is required");
-            setLoading(false);
-            return;
+            return false;
         }
 
         if (!form.weight) {
             setError("Weight is required");
-            setLoading(false);
-            return;
+            return false;
         }
 
         if (form.weight <= 0) {
             setError("Weight must be greater than 0");
-            setLoading(false);
-            return;
+            return false;
         }
 
         // Prepare data
@@ -124,12 +134,28 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
         try {
             if (selectedSku) {
                 await api.put(`/skus/${selectedSku._id}`, skuData);
+                setSuccessMessage("SKU updated successfully!");
+                refresh();
+                if (!shouldAddAnother) {
+                    onClose();
+                }
+                return true;
             } else {
                 await api.post("/skus", skuData);
-            }
+                setSuccessMessage("SKU created successfully!");
+                refresh();
 
-            refresh();
-            onClose();
+                if (shouldAddAnother) {
+                    // Reset form for next SKU
+                    resetForm();
+                    // Clear success message after 2 seconds
+                    setTimeout(() => setSuccessMessage(""), 2000);
+                    return true;
+                } else {
+                    onClose();
+                    return true;
+                }
+            }
         } catch (err) {
             console.error("Error:", err);
 
@@ -142,9 +168,19 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
                     `Failed to ${selectedSku ? "update" : "create"} SKU`
                 );
             }
-        } finally {
-            setLoading(false);
+            return false;
         }
+    };
+
+    const handleSubmit = async (e, shouldAddAnother = false) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+        setSuccessMessage("");
+
+        await saveSKU(shouldAddAnother);
+
+        setLoading(false);
     };
 
     const getVelocityIcon = (velocity) => {
@@ -178,7 +214,7 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
             }}
         >
             <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-slideUp">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={(e) => handleSubmit(e, false)}>
                     {/* Header - Responsive */}
                     <div className="sticky top-0 bg-white dark:bg-slate-900 z-10 flex justify-between items-center p-4 sm:p-6 border-b dark:border-slate-700">
                         <div>
@@ -199,6 +235,16 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
                     </div>
 
                     <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+                        {/* Success Message */}
+                        {successMessage && (
+                            <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl text-sm sm:text-base">
+                                <div className="flex items-start gap-2">
+                                    <FaCheckCircle className="text-lg mt-0.5" />
+                                    <span>{successMessage}</span>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Error Message */}
                         {error && (
                             <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl text-sm sm:text-base animate-shake">
@@ -407,7 +453,7 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
                         </div>
                     </div>
 
-                    {/* Footer - Responsive */}
+                    {/* Footer - Responsive with Save & Add Another Button */}
                     <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t dark:border-slate-700 p-4 sm:p-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
                         <button
                             type="button"
@@ -417,6 +463,20 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
                         >
                             Cancel
                         </button>
+
+                        {/* 🟢 "Save & Add Another" Button - Only for new SKU (not edit mode) */}
+                        {!selectedSku && (
+                            <button
+                                type="button"
+                                onClick={(e) => handleSubmit(e, true)}
+                                disabled={loading}
+                                className="border-2 border-amber-500 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2 order-3 text-sm sm:text-base"
+                            >
+                                <FaPlus className="text-sm" />
+                                {loading ? "Saving..." : "Save & Add Another"}
+                            </button>
+                        )}
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -425,6 +485,7 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
                             {loading && (
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                             )}
+                            <FaSave className="text-sm" />
                             {loading ? "Saving..." : (selectedSku ? "Update SKU" : "Create SKU")}
                         </button>
                     </div>
@@ -433,6 +494,5 @@ function SKUFormModal({ open, onClose, selectedSku, refresh }) {
         </div>
     );
 }
-
 
 export default SKUFormModal;
